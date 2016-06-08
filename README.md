@@ -12,7 +12,7 @@ whatever files have changed since the last backup.
 
 BTFU will intelligently cull your backups, to limit space usage.  By "intelligently" I mean, it will delete some, but
 not all, older backups, leaving you with a complete chronology of your world, but less frequent snapshots the farther
-back you go.  By default it will keep 64 backups.  You choose the number, and BTFU chooses what to delete.
+back you go.  By default it will keep 128 backups.  You choose the number, and BTFU chooses what to delete.
 
 BTFU will back up every 5 minutes, because it can.  And your server will be fine with that, because using the right tool
 for the job works wonders.

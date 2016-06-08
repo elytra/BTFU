@@ -1,14 +1,14 @@
 [
 {
-  "modid": "examplemod",
-  "name": "Example Mod",
-  "description": "Example placeholder mod.",
+  "modid": "BTFU",
+  "name": "BTFU",
+  "description": "Server backup done right",
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "",
   "updateUrl": "",
-  "authorList": ["ExampleDude"],
-  "credits": "The Forge and FML guys, for making this example",
+  "authorList": ["capitalthree"],
+  "credits": "I love you all",
   "logoFile": "",
   "screenshots": [],
   "dependencies": []
