@@ -55,8 +55,7 @@ class BackupProcess {
       val backupsSorted = backups.sortBy(_._2).reverse
       val newest = backupsSorted.head._2.getTime
 
-      val toRemove = backupsSorted.drop(BTFUPerformer.protectedBackups - 1).
-        sliding(3).map {
+      val toRemove = backupsSorted.drop(BTFUPerformer.protectedBackups - 1).sliding(3).map {
           case List((_, d1), (s, _), (_, d0)) =>
             val d1t = d1.getTime
             (s, 1000000*(newest - d1t)/(d1t - d0.getTime)) // fitness score for removal
@@ -68,8 +67,18 @@ class BackupProcess {
     }
 
     /**
-      * Phase 2: save-off & save-all
+      * Phase 2: rsync
       */
+    WorldSavingControl.saveOffAndFlush()
+    val p = lock.synchronized {
+      val p = if (lock.aborted) None else Some(Process(Seq(
+        "rsync", "-ra", BTFUPerformer.mcDir.getAbsolutePath, BTFU.cfg.backupDir.getAbsolutePath+"/model"
+      )).run())
+      lock.process = p
+      p
+    }
+    p.foreach{_.exitValue} // wait on p to either complete or be killed by abort
+    WorldSavingControl.restoreSaving()
   }
 
   private def aborted: Boolean = {

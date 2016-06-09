@@ -29,6 +29,7 @@ import net.minecraftforge.common.MinecraftForge
 
   @EventHandler
   def start(e: FMLServerAboutToStartEvent): Unit = {
+    ServerSaving(true)
     BTFUPerformer.scheduleNextRun
   }
 
