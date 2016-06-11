@@ -7,9 +7,12 @@ import cpw.mods.fml.common.gameevent.TickEvent
 import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent
 import cpw.mods.fml.common.{FMLCommonHandler, Mod}
 import net.minecraftforge.common.MinecraftForge
+import org.apache.logging.log4j.LogManager
 
 @Mod(modid = "BTFU", version = "1", name = "BTFU", modLanguage = "scala") object BTFU {
   var cfg:BTFUConfig = null
+  var serverLive = false
+  val logger = LogManager.getLogger("BTFU")
 
   @EventHandler
   def init(e: FMLPreInitializationEvent) = {
@@ -25,16 +28,19 @@ import net.minecraftforge.common.MinecraftForge
     }
     MinecraftForge.EVENT_BUS.register(handler)
     FMLCommonHandler.instance().bus().register(handler)
+
+    e.getModLog
   }
 
   @EventHandler
   def start(e: FMLServerAboutToStartEvent): Unit = {
-    ServerSaving(true)
+    serverLive = true
     BTFUPerformer.scheduleNextRun
   }
 
   @EventHandler
   def stop(e: FMLServerStoppingEvent): Unit = {
-
+    serverLive = false
+    BTFUPerformer.nextRun = None
   }
 }
