@@ -6,7 +6,7 @@ object WorldSavingControl {
   def saveOffAndFlush() {
       MinecraftServer.getServer.worldServers.foreach { worldserver =>
       if (worldserver != null) {
-        worldserver.levelSaving = false
+        worldserver.disableLevelSaving = true
         worldserver.saveAllChunks(true, null)
         worldserver.saveChunkData()
       }
@@ -16,7 +16,7 @@ object WorldSavingControl {
   def restoreSaving() {
     MinecraftServer.getServer.worldServers.foreach { worldserver =>
       if (worldserver != null) {
-        worldserver.levelSaving = true
+        worldserver.disableLevelSaving = false
       }
     }
   }

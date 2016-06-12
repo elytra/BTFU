@@ -2,13 +2,13 @@ package btfubackup
 
 import java.io.File
 
-import cpw.mods.fml.common.Mod.EventHandler
-import cpw.mods.fml.common.event.{FMLPreInitializationEvent, FMLServerAboutToStartEvent, FMLServerStoppingEvent}
-import cpw.mods.fml.common.eventhandler.SubscribeEvent
-import cpw.mods.fml.common.gameevent.TickEvent
-import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent
-import cpw.mods.fml.common.{FMLCommonHandler, FMLLog, Mod}
 import net.minecraftforge.common.MinecraftForge
+import net.minecraftforge.fml.common.Mod.EventHandler
+import net.minecraftforge.fml.common.event.{FMLServerStoppingEvent, FMLServerAboutToStartEvent, FMLPreInitializationEvent}
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import net.minecraftforge.fml.common.gameevent.TickEvent
+import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent
+import net.minecraftforge.fml.common.{FMLCommonHandler, FMLLog, Mod}
 
 @Mod(modid = "BTFU", version = "1", name = "BTFU", modLanguage = "scala") object BTFU {
   var cfg:BTFUConfig = null
@@ -36,7 +36,6 @@ import net.minecraftforge.common.MinecraftForge
       }
     }
     MinecraftForge.EVENT_BUS.register(handler)
-    FMLCommonHandler.instance().bus().register(handler)
 
     e.getModLog
   }

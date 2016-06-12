@@ -1,0 +1,16 @@
+[
+{
+  "modid": "BTFU",
+  "name": "BTFU",
+  "description": "Server backup done right",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["capitalthree"],
+  "credits": "I love you all",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]

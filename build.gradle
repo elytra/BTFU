@@ -1,30 +1,27 @@
 buildscript {
     repositories {
-        mavenCentral()
+        jcenter()
         maven {
             name = "forge"
             url = "http://files.minecraftforge.net/maven"
         }
-        maven {
-            name = "sonatype"
-            url = "https://oss.sonatype.org/content/repositories/snapshots/"
-        }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
     }
 }
 
 apply plugin: 'scala'
-apply plugin: 'forge'
+apply plugin: 'net.minecraftforge.gradle.forge'
 
 version = "1.0"
 group= "btfubackup.BTFU" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "BTFU"
 
 minecraft {
-    version = "1.7.10-10.13.4.1614-1.7.10"
+    version = "1.8.9-11.15.1.1722"
     runDir = "run"
+    mappings = "stable_22"
 }
 
 dependencies {
