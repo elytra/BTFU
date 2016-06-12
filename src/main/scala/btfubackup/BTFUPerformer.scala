@@ -14,7 +14,6 @@ object BTFUPerformer {
   var nextRun: Option[Long] = None
   var backupProcess: Option[BackupProcess] = None
 
-  val dateMatcher = "d34".r
   val dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH:mm")
 
   val mcDir = new File(".")
@@ -23,8 +22,6 @@ object BTFUPerformer {
 
   val rsyncCmd = Process(Seq(BTFU.cfg.rsync, "-ra", BTFUPerformer.mcDir.getAbsolutePath, modelDir))
   val hardlinkCmd = Process(Seq(BTFU.cfg.cp, "-al", modelDir, tmpDir))
-
-  val protectedBackups = 12 // most recent n backups are safe from deletion
 
   def scheduleNextRun(): Unit = scheduleNextRun(1000 * 60 * 5)
   def scheduleNextRun(delay: Long): Unit = { nextRun = Some(System.currentTimeMillis + delay) }
@@ -68,7 +65,7 @@ class BackupProcess {
       deleteTmp()
       var backups = datestampedBackups
       while (backups.length + 1 > BTFU.cfg.maxBackups) {
-        val toRemove = backups.drop(BTFUPerformer.protectedBackups - 1).sliding(3).map {
+        val toRemove = backups.sliding(3).map {
             case List((_, d1), (s, _), (_, d0)) =>
               (s, 1000000*(backups.head._2 - d0)/(d1 - d0)) // fitness score for removal
           }.maxBy(_._2)._1
