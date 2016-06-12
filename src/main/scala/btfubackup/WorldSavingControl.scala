@@ -6,9 +6,10 @@ object WorldSavingControl {
   def saveOffAndFlush() {
       MinecraftServer.getServer.worldServers.foreach { worldserver =>
       if (worldserver != null) {
-        worldserver.levelSaving = false
+        worldserver.levelSaving = true
         worldserver.saveAllChunks(true, null)
         worldserver.saveChunkData()
+        worldserver.levelSaving = false
       }
     }
   }
