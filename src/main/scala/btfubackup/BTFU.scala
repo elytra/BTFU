@@ -1,11 +1,15 @@
 package btfubackup
 
+import java.io.File
+
 import cpw.mods.fml.common.Mod.EventHandler
 import cpw.mods.fml.common.event.{FMLPreInitializationEvent, FMLServerAboutToStartEvent, FMLServerStoppingEvent}
 import cpw.mods.fml.common.eventhandler.SubscribeEvent
 import cpw.mods.fml.common.gameevent.TickEvent
 import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent
 import cpw.mods.fml.common.{FMLCommonHandler, Mod}
+import net.minecraft.crash.CrashReport
+import net.minecraft.util.ReportedException
 import net.minecraftforge.common.MinecraftForge
 import org.apache.logging.log4j.LogManager
 
@@ -17,6 +21,12 @@ import org.apache.logging.log4j.LogManager
   @EventHandler
   def init(e: FMLPreInitializationEvent) = {
     cfg = BTFUConfig(e.getSuggestedConfigurationFile)
+    if (! cfg.backupDir.exists())
+      throw new ReportedException(new CrashReport(
+        "Backups directory does not exist.  Configure it in BTFU.cfg", new RuntimeException))
+    if (new File(".").getCanonicalPath.startsWith(cfg.backupDir.getCanonicalPath))
+      throw new ReportedException(new CrashReport(
+        "To run this backed up minecraft server, you must copy it outside the backups directory.", new RuntimeException))
 
     val handler = new Object {
       @SubscribeEvent
