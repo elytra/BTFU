@@ -9,14 +9,17 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent
 import net.minecraftforge.fml.common.{FMLCommonHandler, FMLLog, Mod}
+import org.apache.logging.log4j.Logger
 
 @Mod(modid = "BTFU", version = "1", name = "BTFU", modLanguage = "scala") object BTFU {
   var cfg:BTFUConfig = null
+  var logger:Logger = null
   var serverLive = false
-  val logger = FMLLog.getLogger
 
   @EventHandler
   def init(e: FMLPreInitializationEvent) = {
+    logger = e.getModLog
+
     cfg = BTFUConfig(e.getSuggestedConfigurationFile)
     if (! cfg.backupDir.exists()) {
       FMLLog.bigWarning("Backups directory does not exist.  Configure it in BTFU.cfg")
@@ -43,7 +46,7 @@ import net.minecraftforge.fml.common.{FMLCommonHandler, FMLLog, Mod}
   @EventHandler
   def start(e: FMLServerAboutToStartEvent): Unit = {
     serverLive = true
-    BTFUPerformer.scheduleNextRun
+    BTFUPerformer.scheduleNextRun()
   }
 
   @EventHandler
