@@ -8,6 +8,8 @@ import scala.concurrent.Future
 import scala.sys.process.{Process, ProcessBuilder}
 import scala.util.{Success, Try}
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 object BTFUPerformer {
   var nextRun: Option[Long] = None
   var backupProcess: Option[BackupProcess] = None
@@ -38,7 +40,7 @@ object BTFUPerformer {
     nextRun.foreach{ mils =>
       if (System.currentTimeMillis() >= mils && backupProcess.isEmpty) {
         backupProcess = Some(new BackupProcess())
-        BTFU.logger.info("Starting scheduled backup")
+        BTFU.logger.debug("Starting scheduled backup")
       }
     }
   }
@@ -72,7 +74,7 @@ class BackupProcess {
           }.maxBy(_._2)._1
 
         new File(s"${BTFU.cfg.backupDir}/$toRemove").delete()
-        BTFU.logger.info(s"Trimmed backup $toRemove")
+        BTFU.logger.debug(s"Trimmed backup $toRemove")
         if (aborted) return
         backups = datestampedBackups
       }
@@ -89,7 +91,7 @@ class BackupProcess {
       BTFU.logger.warn("rsync failed")
       return
     }
-    BTFU.logger.info("rsync success")
+    BTFU.logger.debug("rsync success")
 
     /**
       * Phase 3: hardlink copy
@@ -108,7 +110,7 @@ class BackupProcess {
     new File(BTFUPerformer.tmpDir).renameTo(
       new File(s"${BTFU.cfg.backupDir}/$datestr")
     )
-    BTFU.logger.info(s"backup success: $datestr")
+    BTFU.logger.debug(s"backup success: $datestr")
   }
 
 
