@@ -17,8 +17,8 @@ object BTFUPerformer {
   val dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH:mm")
 
   val mcDir = new File(".")
-  val modelDir = s"${BTFU.cfg.backupDir.getAbsolutePath}/model"
-  val tmpDir = s"${BTFU.cfg.backupDir.getAbsolutePath}/tmp"
+  val modelDir = s"${BTFU.cfg.backupDir}/model"
+  val tmpDir = s"${BTFU.cfg.backupDir}/tmp"
 
   val rsyncCmd = Process(Seq(BTFU.cfg.rsync, "-ra", BTFUPerformer.mcDir.getAbsolutePath, modelDir))
   val hardlinkCmd = Process(Seq(BTFU.cfg.cp, "-al", modelDir, tmpDir))
@@ -54,7 +54,8 @@ class BackupProcess {
       collect { case (s, Success(d)) => (s, d) }.
       sortBy(_._2).reverse // sort by time since epoch descending
 
-  private def deleteTmp() = new File(s"${BTFU.cfg.backupDir}/tmp").delete() // clean incomplete backup copies
+  private def deleteFileExternal(f: File) = if (f.exists) Process(Seq("rm", "-r", f.getAbsolutePath)).run().exitValue()
+  private def deleteTmp() = deleteFileExternal(new File(s"${BTFU.cfg.backupDir}/tmp")) // clean incomplete backup copies
 
   val futureTask = Future{task()}
   private def task(): Unit = {
@@ -66,12 +67,11 @@ class BackupProcess {
       var backups = datestampedBackups
       while (backups.length + 1 > BTFU.cfg.maxBackups) {
         val toRemove = backups.sliding(3).map {
-            case List((_, d1), (s, _), (_, d0)) =>
-              (s, 1000000*(backups.head._2 - d0)/(d1 - d0)) // fitness score for removal
-          }.maxBy(_._2)._1
-
-        new File(s"${BTFU.cfg.backupDir}/$toRemove").delete()
-        BTFU.logger.debug(s"Trimmed backup $toRemove")
+          case List((_, d1), (s, _), (_, d0)) =>
+            (s, 1000000*(backups.head._2 - d0)/(d1 - d0)) // fitness score for removal
+        }.maxBy(_._2)._1
+        BTFU.logger.debug(s"Trimming backup $toRemove")
+        deleteFileExternal(new File(s"${BTFU.cfg.backupDir}/$toRemove"))
         if (aborted) return
         backups = datestampedBackups
       }
@@ -80,6 +80,7 @@ class BackupProcess {
     /**
       * Phase 2: rsync
       */
+    BTFU.logger.debug("Rsyncing...")
     WorldSavingControl.saveOffAndFlush()
     val backupDatestamp = System.currentTimeMillis() // used later
     val rsyncSuccess = runProcessAbortable(BTFUPerformer.rsyncCmd)
