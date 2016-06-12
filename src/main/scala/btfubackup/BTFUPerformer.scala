@@ -15,7 +15,7 @@ object BTFUPerformer {
   var backupProcess: Option[BackupProcess] = None
 
   val dateMatcher = "d34".r
-  val dateFormat = new SimpleDateFormat("yyyy-MM-dd.HH:mm")
+  val dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH:mm")
 
   val mcDir = new File(".")
   val modelDir = s"${BTFU.cfg.backupDir.getAbsolutePath}/model"

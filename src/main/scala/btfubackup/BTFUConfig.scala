@@ -9,10 +9,10 @@ object BTFUConfig {
   def apply(f: File): BTFUConfig = BTFUConfig(new Configuration(f))
   def apply(c: Configuration): BTFUConfig = {
     val conf = BTFUConfig(
-      new File(c.get("backup directory", "BTFU", "").getString),
-      c.get("number of backups to keep", "BTFU", 128).getInt(128),
-      c.get("rsync", "system", "rsync").getString,
-      c.get("cp", "system", "cp").getString
+      new File(c.get("BTFU", "backup directory", "").getString),
+      c.get("BTFU", "number of backups to keep", 128).getInt(128),
+      c.get("system", "rsync", "rsync").getString,
+      c.get("system", "cp", "cp").getString
     )
     if (c.hasChanged) c.save
     conf
