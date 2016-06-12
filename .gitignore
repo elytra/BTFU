@@ -27,6 +27,7 @@ gradle-app.setting
 version.properties
 #eclipse stuffs
 /.classpath
+/classes
 /.project
 /.settings/
 /eclipse/

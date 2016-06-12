@@ -1,10 +1,10 @@
 package btfubackup
 
-import net.minecraft.server.MinecraftServer
+import net.minecraftforge.fml.common.FMLCommonHandler
 
 object WorldSavingControl {
   def saveOffAndFlush() {
-      MinecraftServer.getServer.worldServers.foreach { worldserver =>
+    FMLCommonHandler.instance.getMinecraftServerInstance.worldServers.foreach { worldserver =>
       if (worldserver != null) {
         worldserver.disableLevelSaving = false
         worldserver.saveAllChunks(true, null)
@@ -15,7 +15,7 @@ object WorldSavingControl {
   }
 
   def restoreSaving() {
-    MinecraftServer.getServer.worldServers.foreach { worldserver =>
+    FMLCommonHandler.instance.getMinecraftServerInstance.worldServers.foreach { worldserver =>
       if (worldserver != null) {
         worldserver.disableLevelSaving = false
       }
