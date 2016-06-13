@@ -8,7 +8,7 @@ object WorldSavingControl {
       if (worldserver != null) {
         worldserver.disableLevelSaving = false
         worldserver.saveAllChunks(true, null)
-        worldserver.saveChunkData()
+//        worldserver.saveChunkData()  TODO enable after https://github.com/MinecraftForge/FML/issues/679
         worldserver.disableLevelSaving = true
       }
     }
