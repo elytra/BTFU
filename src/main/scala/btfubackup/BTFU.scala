@@ -11,7 +11,7 @@ import cpw.mods.fml.common.{FMLCommonHandler, FMLLog, Mod}
 import net.minecraftforge.common.MinecraftForge
 import org.apache.logging.log4j.Logger
 
-@Mod(modid = "BTFU", version = "1", name = "BTFU", modLanguage = "scala") object BTFU {
+@Mod(modid = "BTFU", version = "1", name = "BTFU", modLanguage = "scala", acceptableRemoteVersions="*") object BTFU {
   var cfg:BTFUConfig = null
   var logger:Logger = null
   var serverLive = false
