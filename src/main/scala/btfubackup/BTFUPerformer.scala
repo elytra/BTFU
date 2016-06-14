@@ -54,7 +54,7 @@ class BackupProcess {
       collect { case (s, Success(d)) => (s, d) }.
       sortBy(_._2).reverse // sort by time since epoch descending
 
-  private def deleteFileExternal(f: File) = if (f.exists) Process(Seq("rm", "-r", f.getAbsolutePath)).run().exitValue()
+  private def deleteFileExternal(f: File) = if (f.exists) Process(Seq(BTFU.cfg.rm, "-r", f.getAbsolutePath)).run().exitValue()
   private def deleteTmp() = deleteFileExternal(new File(s"${BTFU.cfg.backupDir}/tmp")) // clean incomplete backup copies
 
   val futureTask = Future{task()}
