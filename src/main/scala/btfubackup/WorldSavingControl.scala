@@ -1,5 +1,6 @@
 package btfubackup
 
+import net.minecraftforge.common.ForgeVersion
 import net.minecraftforge.fml.common.FMLCommonHandler
 
 object WorldSavingControl {
@@ -8,7 +9,8 @@ object WorldSavingControl {
       if (worldserver != null) {
         worldserver.disableLevelSaving = false
         worldserver.saveAllChunks(true, null)
-//        worldserver.saveChunkData()  TODO enable after https://github.com/MinecraftForge/FML/issues/679
+        if (ForgeVersion.buildVersion >= 1961) //  broken in earlier versions
+          worldserver.saveChunkData()          // see https://github.com/MinecraftForge/FML/issues/679
         worldserver.disableLevelSaving = true
       }
     }
