@@ -27,6 +27,8 @@ object BTFUPerformer {
   def scheduleNextRun(delay: Long): Unit = { nextRun = Some(System.currentTimeMillis + delay) }
 
   def tick(): Unit = {
+    WorldSavingControl.mainThreadTick()
+
     backupProcess.foreach{ p =>
       if (p.isCompleted) {
         backupProcess = None
