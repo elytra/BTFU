@@ -2,7 +2,7 @@ BTFU is a minecraft server backup mod designed to be useful and not suck.
 
 To be more specific, instead of a homebrewed half-baked jvm attempt at incremental backups... or worse, not even
 supporting incremental backups, BTFU uses standard tools to carry out an age-old backup strategy that works well.
-- rsync -ra
+- rsync -ra --delete
 - cp -al
 
 In layman's terms, the strategy is to incrementally sync your file tree to a model backup directory, then hardlink-copy

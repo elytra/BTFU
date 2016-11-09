@@ -45,8 +45,12 @@ object WorldSavingControl {
           if (worldserver != null) {
             worldserver.disableLevelSaving = false
             worldserver.saveAllChunks(true, null)
-            if (ForgeVersion.buildVersion >= 1961) //  broken in earlier versions
-              worldserver.saveChunkData() // see https://github.com/MinecraftForge/FML/issues/679
+            if (ForgeVersion.buildVersion >= 1961) try { // see https://github.com/MinecraftForge/FML/issues/679
+              worldserver.saveChunkData()
+            } catch {
+              case e: Throwable => BTFU.logger.warn("Exception from WorldServer.saveChunkData", e)
+            }
+
             worldserver.disableLevelSaving = true
           }
         }

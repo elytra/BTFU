@@ -20,7 +20,7 @@ object BTFUPerformer {
   val modelDir = s"${BTFU.cfg.backupDir}/model"
   val tmpDir = s"${BTFU.cfg.backupDir}/tmp"
 
-  val rsyncCmd = Process(Seq(BTFU.cfg.rsync, "-ra", BTFUPerformer.mcDir.getAbsolutePath, modelDir))
+  val rsyncCmd = Process(Seq(BTFU.cfg.rsync, "-ra", "--delete", BTFUPerformer.mcDir.getAbsolutePath, modelDir))
   val hardlinkCmd = Process(Seq(BTFU.cfg.cp, "-al", modelDir, tmpDir))
 
   def scheduleNextRun(): Unit = scheduleNextRun(1000 * 60 * 5)
