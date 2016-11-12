@@ -5,7 +5,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 import scala.concurrent.Future
-import scala.sys.process.{Process, ProcessBuilder}
 import scala.util.{Success, Try}
 
 import BTFU.cfg

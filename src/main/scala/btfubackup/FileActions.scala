@@ -2,7 +2,7 @@ package btfubackup
 
 import java.io.File
 import java.nio.file.{StandardCopyOption, Path, Files}
-import BTFU.cfg
+import BTFU.{cfg, logger}
 
 import scala.sys.process.Process
 import scala.util.Try
@@ -20,14 +20,14 @@ object FileActions {
 }
 
 object ExternalCommandFileActions extends FileActions {
-  override def delete(f: File) =
-    Process(Seq(cfg.rm, "-r", f.getAbsolutePath)).run().exitValue() == 0
+  override def delete(f: File) = if (f.exists())
+    Process(Seq(cfg.rm, "-r", f.getAbsolutePath)).run().exitValue() == 0 else false
 
   override def hardlinkCopy(from: Path, to: Path) =
     Process(Seq(cfg.cp, "-al", from.toString, to.toString)).run().exitValue() == 0
 
   override def sync(from: Path, to: Path) =
-    Process(Seq(cfg.rsync, "-ra", "--delete", from.toString, to.toString)).run().exitValue() == 0
+    Process(Seq(cfg.rsync, "-ra", "--delete", from.toString+"/", to.toString)).run().exitValue() == 0
 }
 
 object JvmNativeFileActions extends FileActions {
@@ -83,29 +83,33 @@ object JvmNativeFileActions extends FileActions {
   }.isSuccess
 
 
-  override def sync(from: Path, to: Path) = Try {
-    safeDualTraverse({ case (fromPrefix: Path, toPrefix: Path, from: Path, to: Path) =>
-      val fromFile = from.toFile; val toFile = to.toFile
-      if (fromFile.isDirectory) {
-        toFile.list()
-          .filterNot(fromFile.list().toSet) // extraneous files in to but not from
-          .map(to.resolve).map(_.toFile)
-          .foreach(delete)
-      } else {
-        if (toFile.exists()) {
-          if (toFile.isDirectory) {
-            delete(toFile)
-            copyWithAttributes(to, from)
-          } else {
-            if (toFile.lastModified() < fromFile.lastModified())
-              copyWithAttributes(to, from)
-          }
+  override def sync(from: Path, to: Path) = {
+    val t = Try {
+      safeDualTraverse({ case (fromPrefix: Path, toPrefix: Path, from: Path, to: Path) =>
+        val fromFile = from.toFile; val toFile = to.toFile
+        if (fromFile.isDirectory) {
+          toFile.list()
+            .filterNot(fromFile.list().toSet) // extraneous files in to but not from
+            .map(to.resolve).map(_.toFile)
+            .foreach(delete)
         } else {
-          copyWithAttributes(to, from)
+          if (toFile.exists()) {
+            if (toFile.isDirectory) {
+              delete(toFile)
+              copyWithAttributes(from, to)
+            } else {
+              if (toFile.lastModified() < fromFile.lastModified())
+                copyWithAttributes(from, to)
+            }
+          } else {
+            copyWithAttributes(from, to)
+          }
         }
-      }
-    })(from, to, from)
-  }.isSuccess
+      })(from, to, from)
+    }
+    t.recover{case e => logger.warn("Exception in fake rsync", e)}
+    t.isSuccess
+  }
 
-  def copyWithAttributes(to: Path, from: Path) = Files.copy(to, from, StandardCopyOption.COPY_ATTRIBUTES)
+  def copyWithAttributes(from: Path, to: Path) = Files.copy(from, to, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING)
 }
