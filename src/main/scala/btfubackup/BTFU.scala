@@ -21,15 +21,15 @@ import org.apache.logging.log4j.Logger
     logger = e.getModLog
 
     cfg = BTFUConfig(e.getSuggestedConfigurationFile)
-    if (! cfg.backupDir.exists()) {
+    if (! cfg.backupDir.toFile.exists()) {
       FMLLog.bigWarning("Backups directory does not exist.  Configure it in BTFU.cfg")
       FMLCommonHandler.instance().exitJava(1, false)
     }
-    if (cfg.backupDir.getCanonicalPath.startsWith(new File(".").getCanonicalPath)) {
+    if (FileActions.subdirectoryOf(cfg.backupDir, BTFU.cfg.mcDir)) {
       FMLLog.bigWarning("This mod backs up your entire minecraft directory, so the backups directory cannot be inside your minecraft directory.")
       FMLCommonHandler.instance().exitJava(1, true)
     }
-    if (new File(".").getCanonicalPath.startsWith(cfg.backupDir.getCanonicalPath)) {
+    if (FileActions.subdirectoryOf(cfg.mcDir, cfg.backupDir)) {
       FMLLog.bigWarning("To run this backed up minecraft server, you must copy it outside the backups directory.")
       FMLCommonHandler.instance().exitJava(1, true)
     }

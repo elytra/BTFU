@@ -19,9 +19,9 @@ group= "btfubackup.BTFU" // http://maven.apache.org/guides/mini/guide-naming-con
 archivesBaseName = "BTFU-1.9.4"
 
 minecraft {
-    version = "1.9.4-12.17.0.1963"
+    version = "1.9.4-12.17.0.2051"
     runDir = "run"
-    mappings = "snapshot_20160523"
+    mappings = "stable_26"
 }
 
 dependencies {
