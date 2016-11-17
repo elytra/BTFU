@@ -15,7 +15,9 @@ object BTFUPerformer {
   var nextRun: Option[Long] = None
   var backupProcess: Option[BackupProcess] = None
 
-  val dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH:mm")
+  val dateFormat = new SimpleDateFormat(s"yyyy-MM-dd_HH${
+    if (System.getProperty("os.name").startsWith("Windows")) "." else ":" // windows can't have colons in filenames
+  }mm")
 
   def scheduleNextRun(): Unit = { nextRun = Some(System.currentTimeMillis + 1000 * 60 * 5) }
 
@@ -95,10 +97,10 @@ class BackupProcess {
       * Give the successful backup a date-name!
       */
     val datestr = BTFUPerformer.dateFormat.format(new Date(backupDatestamp))
-    tmpDir.toFile.renameTo(
-      new File(s"${cfg.backupDir}/$datestr")
-    )
-    BTFU.logger.debug(s"backup success: $datestr")
+    if (! tmpDir.toFile.renameTo(cfg.backupDir.resolve(datestr).toFile))
+      BTFU.logger.warn("rename failure??")
+    else
+      BTFU.logger.debug(s"backup success: $datestr")
   }
 
   def isCompleted = futureTask.isCompleted

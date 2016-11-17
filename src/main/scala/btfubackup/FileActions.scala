@@ -15,7 +15,6 @@ trait FileActions {
 
 object FileActions {
   def subdirectoryOf(sub: Path, parent: Path) = canonicalize(sub).startsWith(canonicalize(parent))
-  def traverse(f: File, path: String): File = new File(s"$f/$path")
   def canonicalize(p: Path) = p.toAbsolutePath.normalize()
 }
 

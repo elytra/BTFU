@@ -14,7 +14,7 @@ buildscript {
 apply plugin: 'scala'
 apply plugin: 'net.minecraftforge.gradle.forge'
 
-version = "2.0"
+version = "2.1"
 group= "btfubackup.BTFU" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "BTFU-1.9.4"
 

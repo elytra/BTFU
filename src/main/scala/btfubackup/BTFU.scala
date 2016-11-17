@@ -1,7 +1,5 @@
 package btfubackup
 
-import java.io.File
-
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.Mod.EventHandler
 import net.minecraftforge.fml.common.event.{FMLServerStoppingEvent, FMLServerAboutToStartEvent, FMLPreInitializationEvent}
