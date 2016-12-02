@@ -41,7 +41,7 @@ object WorldSavingControl {
   private def realSaveTasks(t: Int) = {
     t match {
       case 1 => // save-off and save-all
-        FMLCommonHandler.instance.getMinecraftServerInstance.worldServers.foreach { worldserver =>
+        FMLCommonHandler.instance.getMinecraftServerInstance.worlds.foreach { worldserver =>
           if (worldserver != null) {
             worldserver.disableLevelSaving = false
             worldserver.saveAllChunks(true, null)
@@ -55,7 +55,7 @@ object WorldSavingControl {
           }
         }
       case 2 => // save-on
-        FMLCommonHandler.instance.getMinecraftServerInstance.worldServers.foreach { worldserver =>
+        FMLCommonHandler.instance.getMinecraftServerInstance.worlds.foreach { worldserver =>
           if (worldserver != null) {
             worldserver.disableLevelSaving = false
           }
