@@ -1,6 +1,6 @@
 [
 {
-  "modid": "BTFU",
+  "modid": "btfu",
   "name": "BTFU",
   "description": "Server backup done right",
   "version": "${version}",

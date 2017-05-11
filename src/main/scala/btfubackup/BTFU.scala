@@ -9,7 +9,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent
 import net.minecraftforge.fml.common.{FMLCommonHandler, FMLLog, Mod}
 import org.apache.logging.log4j.Logger
 
-@Mod(modid = "BTFU", version = "1", name = "BTFU", modLanguage = "scala", acceptableRemoteVersions="*") object BTFU {
+@Mod(modid = "btfu", version = "1", name = "BTFU", modLanguage = "scala", acceptableRemoteVersions="*") object BTFU {
   var cfg:BTFUConfig = null
   var logger:Logger = null
   var serverLive = false
