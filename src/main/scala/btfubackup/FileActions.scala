@@ -14,8 +14,9 @@ trait FileActions {
 }
 
 object FileActions {
-  def subdirectoryOf(sub: Path, parent: Path) = canonicalize(sub).startsWith(canonicalize(parent))
-  def canonicalize(p: Path) = p.toAbsolutePath.normalize()
+  def subdirectoryOf(sub: Path, parent: Path): Boolean = subdirectoryOf(sub.toFile, parent)
+  def subdirectoryOf(sub: File, parent: Path): Boolean = sub.getCanonicalFile.toPath.startsWith(canonicalize(parent))
+  def canonicalize(p: Path) = p.toFile.getCanonicalFile.toPath
 }
 
 object ExternalCommandFileActions extends FileActions {
@@ -33,7 +34,7 @@ object JvmNativeFileActions extends FileActions {
   override def delete(f: File) = Try(safeDelete(f.toPath, f)).isSuccess
 
   def safeDelete(prefix: Path, f: File): Unit = {
-    if (! f.toPath.startsWith(prefix)) return
+    if (! FileActions.subdirectoryOf(f, prefix)) return
 
     if (f.isDirectory())
       f.listFiles().foreach(safeDelete(prefix, _))
@@ -41,9 +42,18 @@ object JvmNativeFileActions extends FileActions {
     f.delete()
   }
 
+  def deleteNonFolder(d: File): Unit = {
+    if (d.exists() && (!d.isDirectory || Files.isSymbolicLink(d.toPath))) delete(d)
+  }
+
   def definitelyMakeDir(d: File): Unit = {
-    if (d.exists() && !d.isDirectory) delete(d)
+    deleteNonFolder(d)
     d.mkdirs()
+  }
+
+  def definitelyMakeSymlink(p: Path, linkDest: Path): Unit = {
+    deleteNonFolder(p.toFile)
+    Files.createSymbolicLink(p, linkDest)
   }
 
   /**
@@ -59,7 +69,7 @@ object JvmNativeFileActions extends FileActions {
     * @param from
     */
   def safeDualTraverse(main: (Path, Path, Path, Path) => Unit)(fromPrefix: Path, toPrefix: Path, from: Path): Unit = {
-    if (!from.startsWith(fromPrefix)) return
+    if (!FileActions.subdirectoryOf(from, fromPrefix)) return
     val fromFile = from.toFile
     val to = toPrefix.resolve(fromPrefix.relativize(from))
 
@@ -69,7 +79,11 @@ object JvmNativeFileActions extends FileActions {
 
     if (fromFile.isDirectory)
       fromFile.listFiles().foreach { f =>
-        safeDualTraverse(main)(fromPrefix, toPrefix, f.toPath)
+        val path = f.toPath
+        if (Files.isSymbolicLink(path))
+          definitelyMakeSymlink(toPrefix.resolve(fromPrefix.relativize(path)), Files.readSymbolicLink(path))
+        else
+          safeDualTraverse(main)(fromPrefix, toPrefix, path)
       }
   }
 
