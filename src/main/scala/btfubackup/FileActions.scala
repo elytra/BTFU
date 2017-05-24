@@ -34,10 +34,12 @@ object JvmNativeFileActions extends FileActions {
   override def delete(f: File) = Try(safeDelete(f.toPath, f)).isSuccess
 
   def safeDelete(prefix: Path, f: File): Unit = {
-    if (! FileActions.subdirectoryOf(f, prefix)) return
+    if (! Files.isSymbolicLink(f.toPath)) {
+      if (! FileActions.subdirectoryOf(f, prefix)) return
 
-    if (f.isDirectory())
-      f.listFiles().foreach(safeDelete(prefix, _))
+      if (f.isDirectory)
+        f.listFiles().foreach(safeDelete(prefix, _))
+    }
 
     f.delete()
   }
