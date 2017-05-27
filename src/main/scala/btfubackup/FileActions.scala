@@ -59,7 +59,7 @@ object JvmNativeFileActions extends FileActions {
   }
 
   def definitelyMakeSymlink(p: Path, linkDest: Path): Unit = {
-    deleteNonFolder(p.toFile)
+    delete(p.toFile)
     Files.createSymbolicLink(p, linkDest)
   }
 
