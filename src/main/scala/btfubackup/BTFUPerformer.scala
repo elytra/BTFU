@@ -77,7 +77,7 @@ class BackupProcess {
     BTFU.logger.debug("Rsyncing...")
     WorldSavingControl.saveOffAndFlush()
     val backupDatestamp = System.currentTimeMillis() // used later
-    val rsyncSuccess = fileActions.sync(cfg.mcDir, modelDir)
+    val rsyncSuccess = fileActions.sync(cfg.mcDir, modelDir, BTFU.cfg.excludes)
     WorldSavingControl.restoreSaving()
     if (! rsyncSuccess) { // if we aborted here, we just have a partial rsync that can be corrected next time
       BTFU.logger.warn("rsync failed")

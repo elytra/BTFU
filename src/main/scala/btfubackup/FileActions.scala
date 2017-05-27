@@ -1,7 +1,8 @@
 package btfubackup
 
 import java.io.File
-import java.nio.file.{StandardCopyOption, Path, Files}
+import java.nio.file._
+
 import BTFU.{cfg, logger}
 
 import scala.sys.process.Process
@@ -10,7 +11,7 @@ import scala.util.Try
 trait FileActions {
   def delete(f: File): Boolean
   def hardlinkCopy(from: Path, to: Path): Boolean
-  def sync(from: Path, to: Path): Boolean
+  def sync(from: Path, to: Path, excluded: Iterable[String]): Boolean
 }
 
 object FileActions {
@@ -26,11 +27,15 @@ object ExternalCommandFileActions extends FileActions {
   override def hardlinkCopy(from: Path, to: Path) =
     Process(Seq(cfg.cp, "-al", from.toString, to.toString)).run().exitValue() == 0
 
-  override def sync(from: Path, to: Path) =
-    Process(Seq(cfg.rsync, "-ra", "--delete", from.toString+"/", to.toString)).run().exitValue() == 0
+  override def sync(from: Path, to: Path, excluded: Iterable[String]) =
+    Process(Seq(cfg.rsync, "-ra", "--delete", "--delete-excluded")
+      ++ excluded.map("--exclude=" + _)
+      ++ Seq(from.toString+"/", to.toString)).run().exitValue() == 0
 }
 
 object JvmNativeFileActions extends FileActions {
+  val fs = FileSystems.getDefault
+
   override def delete(f: File) = Try(safeDelete(f.toPath, f)).isSuccess
 
   def safeDelete(prefix: Path, f: File): Unit = {
@@ -70,7 +75,8 @@ object JvmNativeFileActions extends FileActions {
     * @param toPrefix
     * @param from
     */
-  def safeDualTraverse(main: (Path, Path, Path, Path) => Unit)(fromPrefix: Path, toPrefix: Path, from: Path): Unit = {
+  private def safeDualTraverse(main: (Path, Path, Path, Path) => Unit)
+                              (fromPrefix: Path, excludes: Iterable[PathMatcher], toPrefix: Path, from: Path): Unit = {
     if (!FileActions.subdirectoryOf(from, fromPrefix)) return
     val fromFile = from.toFile
     val to = toPrefix.resolve(fromPrefix.relativize(from))
@@ -82,10 +88,13 @@ object JvmNativeFileActions extends FileActions {
     if (fromFile.isDirectory)
       fromFile.listFiles().foreach { f =>
         val path = f.toPath
-        if (Files.isSymbolicLink(path))
-          definitelyMakeSymlink(toPrefix.resolve(fromPrefix.relativize(path)), Files.readSymbolicLink(path))
-        else
-          safeDualTraverse(main)(fromPrefix, toPrefix, path)
+        val relative = fromPrefix.relativize(path)
+        if (!excludes.exists(_.matches(relative))) {
+          if (Files.isSymbolicLink(path))
+            definitelyMakeSymlink(toPrefix.resolve(relative), Files.readSymbolicLink(path))
+          else
+            safeDualTraverse(main)(fromPrefix, excludes, toPrefix, path)
+        }
       }
   }
 
@@ -94,18 +103,24 @@ object JvmNativeFileActions extends FileActions {
       if (! from.toFile.isDirectory) {
         Files.createLink(to, from)
       }
-    })(from, to, from)
+    })(from, Seq(), to, from)
   }.isSuccess
 
 
-  override def sync(from: Path, to: Path) = {
+  override def sync(from: Path, to: Path, excluded: Iterable[String]) = {
+    val excludeMatchers = excluded.map(glob => fs.getPathMatcher("glob:"+glob))
     val t = Try {
       safeDualTraverse({ case (fromPrefix: Path, toPrefix: Path, from: Path, to: Path) =>
         val fromFile = from.toFile; val toFile = to.toFile
         if (fromFile.isDirectory) {
-          toFile.list()
-            .filterNot(fromFile.list().toSet) // extraneous files in to but not from
-            .map(to.resolve).map(_.toFile)
+          val q = toFile.list()
+            .filterNot(
+              fromFile.list().filterNot(filename =>
+                excludeMatchers.exists(_.matches(fromPrefix.relativize(from.resolve(filename))))
+              ).toSet // extraneous files in to but not from (or excluded)
+            )
+            .map(to.resolve)
+            .map(_.toFile)
             .foreach(delete)
         } else {
           if (toFile.exists()) {
@@ -120,7 +135,7 @@ object JvmNativeFileActions extends FileActions {
             copyWithAttributes(from, to)
           }
         }
-      })(from, to, from)
+      })(from, excludeMatchers, to, from)
     }
     t.recover{case e => logger.warn("Exception in fake rsync", e)}
     t.isSuccess

@@ -4,7 +4,8 @@ import java.io.File
 import java.nio.file.Path
 import net.minecraftforge.common.config.Configuration
 
-case class BTFUConfig private (backupDir: Path, maxBackups: Int, rsync: String, cp: String, rm: String, systemless: Boolean) {
+case class BTFUConfig private (backupDir: Path, maxBackups: Int, rsync: String, cp: String, rm: String,
+                               systemless: Boolean, excludes: Array[String]) {
   val mcDir = FileActions.canonicalize(new File(".").toPath)
 }
 
@@ -17,7 +18,10 @@ object BTFUConfig {
       c.get("system", "rsync", "rsync").getString,
       c.get("system", "cp", "cp").getString,
       c.get("system", "rm", "rm").getString,
-      c.getBoolean("systemless", "system", false, "ignores platform-native tools and uses simple jvm-based implementations")
+      c.getBoolean("systemless", "system", false, "ignores platform-native tools and uses simple jvm-based implementations"),
+      c.getStringList("excluded paths", "BTFU", Array(),
+        "For normal operation, see rsync manual for --exclude.  For systemless mode, see java.nio.file.PathMatcher.  " +
+          "Patterns are for relative paths from the server root.")
     )
     if (c.hasChanged) c.save
     conf
