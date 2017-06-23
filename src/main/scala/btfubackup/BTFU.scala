@@ -1,8 +1,11 @@
 package btfubackup
 
+import java.io.File
+import java.nio.file.Path
+
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.Mod.EventHandler
-import net.minecraftforge.fml.common.event.{FMLServerStoppingEvent, FMLServerAboutToStartEvent, FMLPreInitializationEvent}
+import net.minecraftforge.fml.common.event.{FMLPreInitializationEvent, FMLServerAboutToStartEvent, FMLServerStoppingEvent}
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent
@@ -14,22 +17,50 @@ import org.apache.logging.log4j.Logger
   var logger:Logger = null
   var serverLive = false
 
+  import net.minecraftforge.fml.common.SidedProxy
+
+  @SidedProxy(clientSide = "btfubackup.ClientProxy", serverSide = "btfubackup.ServerProxy") var proxy: CommonProxy = null
+
   @EventHandler
-  def init(e: FMLPreInitializationEvent) = {
+  def init(e: FMLPreInitializationEvent): Unit = {
     logger = e.getModLog
 
     cfg = BTFUConfig(e.getSuggestedConfigurationFile)
-    if (! cfg.backupDir.toFile.exists()) {
-      FMLLog.bigWarning("Backups directory does not exist.  Configure it in BTFU.cfg")
-      FMLCommonHandler.instance().exitJava(1, false)
-    }
-    if (FileActions.subdirectoryOf(cfg.backupDir, BTFU.cfg.mcDir)) {
-      FMLLog.bigWarning("This mod backs up your entire minecraft directory, so the backups directory cannot be inside your minecraft directory.")
-      FMLCommonHandler.instance().exitJava(1, true)
-    }
-    if (FileActions.subdirectoryOf(cfg.mcDir, cfg.backupDir)) {
-      FMLLog.bigWarning("To run this backed up minecraft server, you must copy it outside the backups directory.")
-      FMLCommonHandler.instance().exitJava(1, true)
+
+    startupPathChecks(cfg.backupDir).foreach { error =>
+      (if (cfg.disablePrompts) None else proxy.getDedicatedServerInstance) match {
+        case Some(dedi) =>
+          btfubanner()
+          var pathCheck: Option[String] = Some(error)
+          var enteredPath: Path = null
+          do {
+            logger.error(pathCheck.get)
+            logger.error("Please enter a new path and press enter (or exit out and edit btfu.cfg)")
+
+            val cmd = {
+              while (dedi.pendingCommandList.isEmpty && dedi.isServerRunning) {
+                Thread.sleep(25) // imagine a world where we use notify when we add to the threadsafe list.
+              }
+              if (!dedi.isServerRunning) return // if the GUI window is closed
+              dedi.pendingCommandList.remove(0)
+            }
+
+            enteredPath = FileActions.canonicalize(new File(cmd.command).toPath)
+            pathCheck = Some("buttholes")//startupPathChecks(path)
+            pathCheck = startupPathChecks(enteredPath)
+          } while (pathCheck.isDefined)
+
+          logger.error(s"Awesome!  Your backups will go in $enteredPath.  I will shut up until something goes wrong!")
+          cfg.setBackupDir(enteredPath)
+        case None =>
+          btfubanner()
+          logger.error(s"/============================================================")
+          logger.error(s"| $error")
+          logger.error(s"| Please configure the backup path in btfu.cfg.")
+          logger.error(s"\\============================================================")
+
+          FMLCommonHandler.instance().exitJava(1, false)
+      }
     }
 
     val handler = new Object {
@@ -41,8 +72,28 @@ import org.apache.logging.log4j.Logger
       }
     }
     MinecraftForge.EVENT_BUS.register(handler)
+  }
 
-    e.getModLog
+  /**
+    * @param path to check
+    * @return Some(errormessage) if there is a problem, or None if the backup path is acceptable
+    */
+  def startupPathChecks(path: Path): Option[String] = {
+    if (path.equals(cfg.mcDir))
+      return Some("Backups directory is not set or matches your minecraft directory.")
+
+    if (! path.toFile.exists())
+      return Some(s"Backups directory ${'"'}$path${'"'} does not exist.")
+
+    if (FileActions.subdirectoryOf(path, cfg.mcDir))
+      return Some(s"Backups directory ${'"'}$path${'"'} is inside your minecraft directory ${'"'}${cfg.mcDir}${'"'}.\n" +
+        s"This mod backups your entire minecraft directory, so that won't work.")
+
+    if (FileActions.subdirectoryOf(cfg.mcDir, path))
+      return Some(s"Backups directory ${'"'}$path${'"'} encompasses your minecraft server!\n" +
+        s"(are you trying to run a backup without copying it, or back up to a directory your minecraft server is in?)")
+
+    None
   }
 
   @EventHandler
@@ -55,5 +106,26 @@ import org.apache.logging.log4j.Logger
   def stop(e: FMLServerStoppingEvent): Unit = {
     serverLive = false
     BTFUPerformer.nextRun = None
+  }
+
+  def btfubanner(): Unit = {
+    logger.error("               ,'\";-------------------;\"`.")
+    logger.error("               ;[]; BBB  TTT FFF U  U ;[];")
+    logger.error("               ;  ; B  B  T  F   U  U ;  ;")
+    logger.error("               ;  ; B  B  T  F   U  U ;  ;")
+    logger.error("               ;  ; BBB   T  FFF U  U ;  ;")
+    logger.error("               ;  ; B  B  T  F   U  U ;  ;")
+    logger.error("               ;  ; B  B  T  F   U  U ;  ;")
+    logger.error("               ;  ; BBB   T  F    UU  ;  ;")
+    logger.error("               ;  `.                 ,'  ;")
+    logger.error("               ;    \"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"    ;")
+    logger.error("               ;    ,-------------.---.  ;")
+    logger.error("               ;    ;  ;\"\";       ;   ;  ;")
+    logger.error("               ;    ;  ;  ;       ;   ;  ;")
+    logger.error("               ;    ;  ;  ;       ;   ;  ;")
+    logger.error("               ;//||;  ;  ;       ;   ;||;")
+    logger.error("               ;\\\\||;  ;__;       ;   ;\\/;")
+    logger.error("                `. _;          _  ;  _;  ;")
+    logger.error("                  \" \"\"\"\"\"\"\"\"\"\"\" \"\"\"\"\" \"\"\"")
   }
 }

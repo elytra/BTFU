@@ -22,13 +22,13 @@ object FileActions {
 
 object ExternalCommandFileActions extends FileActions {
   override def delete(f: File) = if (f.exists())
-    Process(Seq(cfg.rm, "-r", f.getAbsolutePath)).run().exitValue() == 0 else false
+    Process(Seq(cfg.cmds.rm, "-r", f.getAbsolutePath)).run().exitValue() == 0 else false
 
   override def hardlinkCopy(from: Path, to: Path) =
-    Process(Seq(cfg.cp, "-al", from.toString, to.toString)).run().exitValue() == 0
+    Process(Seq(cfg.cmds.cp, "-al", from.toString, to.toString)).run().exitValue() == 0
 
   override def sync(from: Path, to: Path, excluded: Iterable[String]) =
-    Process(Seq(cfg.rsync, "-ra", "--delete", "--delete-excluded")
+    Process(Seq(cfg.cmds.rsync, "-ra", "--delete", "--delete-excluded")
       ++ excluded.map("--exclude=" + _)
       ++ Seq(from.toString+"/", to.toString)).run().exitValue() == 0
 }
