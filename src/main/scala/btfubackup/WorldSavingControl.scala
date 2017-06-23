@@ -1,6 +1,5 @@
 package btfubackup
 
-import net.minecraftforge.common.ForgeVersion
 import net.minecraftforge.fml.common.FMLCommonHandler
 
 object WorldSavingControl {
@@ -45,8 +44,8 @@ object WorldSavingControl {
           if (worldserver != null) {
             worldserver.disableLevelSaving = false
             worldserver.saveAllChunks(true, null)
-            if (ForgeVersion.buildVersion >= 1961) try { // see https://github.com/MinecraftForge/FML/issues/679
-              worldserver.saveChunkData()
+            try {
+              worldserver.flushToDisk()
             } catch {
               case e: Throwable => BTFU.logger.warn("Exception from WorldServer.saveChunkData", e)
             }

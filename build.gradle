@@ -7,7 +7,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
     }
 }
 
@@ -16,12 +16,12 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 
 version = "2.2"
 group= "btfubackup.BTFU" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "BTFU-1.11.2"
+archivesBaseName = "BTFU-1.12"
 
 minecraft {
-    version = "1.11.2-13.20.0.2201"
+    version = "1.12-14.21.0.2322"
     runDir = "run"
-    mappings = "snapshot_20161220"
+    mappings = "snapshot_20170613"
 }
 
 dependencies {
