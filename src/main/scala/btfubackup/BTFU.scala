@@ -46,7 +46,6 @@ import org.apache.logging.log4j.Logger
             }
 
             enteredPath = FileActions.canonicalize(new File(cmd.command).toPath)
-            pathCheck = Some("buttholes")//startupPathChecks(path)
             pathCheck = startupPathChecks(enteredPath)
           } while (pathCheck.isDefined)
 
