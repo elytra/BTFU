@@ -50,7 +50,8 @@ class BackupProcess {
       collect { case (s, Success(d)) => (s, d) }.
       sortBy(_._2).reverse // sort by time since epoch descending
 
-  private def deleteTmp() = fileActions.delete(new File(s"${cfg.backupDir}/tmp")) // clean incomplete backup copies
+  private def deleteTmp() = deleteBackup("tmp") // clean incomplete backup copies
+  private def deleteBackup(name: String) = fileActions.delete(new File(s"${cfg.backupDir}/$name"))
 
   val futureTask = Future{task()}
   private def task(): Unit = {
@@ -59,15 +60,24 @@ class BackupProcess {
       */
     {
       deleteTmp()
+
       var backups = datestampedBackups
-      while (backups.length + 1 > cfg.maxBackups) {
+      val newestTime = backups.head._2
+      if (cfg.maxAgeSec > 0) {
+        datestampedBackups.dropWhile{case (_, time) => newestTime - time <= cfg.maxAgeSec}.drop(1)
+          .foreach { case (name, _) =>
+            BTFU.logger.debug(s"Trimming old backup $name")
+            deleteBackup(name)
+          }
+      }
+
+      while ({backups = datestampedBackups; backups.length + 1 > cfg.maxBackups}) {
         val toRemove = backups.sliding(3).map {
           case List((_, d1), (s, _), (_, d0)) =>
             (s, 1000000*(backups.head._2 - d0)/(d1 - d0)) // fitness score for removal
         }.maxBy(_._2)._1
         BTFU.logger.debug(s"Trimming backup $toRemove")
-        fileActions.delete(new File(s"${cfg.backupDir}/$toRemove"))
-        backups = datestampedBackups
+        deleteBackup(s"$toRemove")
       }
     }
 

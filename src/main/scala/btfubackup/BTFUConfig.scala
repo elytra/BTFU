@@ -6,7 +6,7 @@ import java.nio.file.Path
 import net.minecraftforge.common.config.{Configuration, Property}
 
 case class BTFUConfig (var backupDirProp: Property, maxBackups: Int, disablePrompts: Boolean, cmds: BTFUNativeCommands,
-                               systemless: Boolean, excludes: Array[String], c: Configuration) {
+                               systemless: Boolean, excludes: Array[String], maxAgeSec: Int, c: Configuration) {
   val mcDir = FileActions.canonicalize(new File(".").toPath)
 
   def backupDir: Path = {
@@ -37,12 +37,13 @@ object BTFUConfig {
     val conf = BTFUConfig(
       c.get("BTFU", "backup directory", ""),
       c.get("BTFU", "number of backups to keep", 128).getInt(128),
-      c.get("BTFU", "disable interactive prompts", 128, "halt server instead of prompting at console on dedicated servers").getBoolean(false),
+      c.getBoolean("BTFU", "disable interactive prompts", false, "halt server instead of prompting at console on dedicated servers"),
       (BTFUNativeCommands.apply _).tupled(commands),
       systemless,
       c.getStringList("excluded paths", "BTFU", Array(),
         "For normal operation, see rsync manual for --exclude.  For systemless mode, see java.nio.file.PathMatcher.  " +
           "Patterns are for relative paths from the server root."),
+      60*60*24*c.get("BTFU", "Maximum backup age", -1, "Backups older than this many days will be deleted prior to logarithmic pruning, -1 to keep a complete history").getInt(-1),
       c
     )
     if (c.hasChanged) c.save()
