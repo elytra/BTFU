@@ -64,7 +64,7 @@ class BackupProcess {
       var backups = datestampedBackups
       val newestTime = backups.head._2
       if (cfg.maxAgeSec > 0) {
-        datestampedBackups.dropWhile{case (_, time) => newestTime - time <= cfg.maxAgeSec}.drop(1)
+        datestampedBackups.dropWhile{case (_, time) => newestTime - time <= 1000 * cfg.maxAgeSec}.drop(1)
           .foreach { case (name, _) =>
             BTFU.logger.debug(s"Trimming old backup $name")
             deleteBackup(name)
