@@ -3,7 +3,7 @@ package btfubackup
 import java.io.File
 import java.nio.file._
 
-import BTFU.{cfg, logger}
+import BTFU.cfg
 
 import scala.sys.process.Process
 import scala.util.Try
@@ -28,9 +28,10 @@ object ExternalCommandFileActions extends FileActions {
     Process(Seq(cfg.cmds.cp, "-al", from.toString, to.toString)).run().exitValue() == 0
 
   override def sync(from: Path, to: Path, excluded: Iterable[String]) =
-    Process(Seq(cfg.cmds.rsync, "-ra", "--delete", "--delete-excluded")
+    Process(Seq(BTFU.cfg.cmds.rsync, "-ra", "--delete", "--delete-excluded")
       ++ excluded.map("--exclude=" + _)
-      ++ Seq(from.toString+"/", to.toString)).run().exitValue() == 0
+      ++ Seq(from.toString+"/", to.toString)
+    ).run().exitValue() == 0
 }
 
 object JvmNativeFileActions extends FileActions {
@@ -137,7 +138,7 @@ object JvmNativeFileActions extends FileActions {
         }
       })(from, excludeMatchers, to, from)
     }
-    t.recover{case e => logger.warn("Exception in fake rsync", e)}
+    t.recover{case e => BTFU.log.warn("Exception in fake rsync", e)}
     t.isSuccess
   }
 

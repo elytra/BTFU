@@ -1,0 +1,92 @@
+buildscript {
+    repositories {
+        jcenter()
+        maven { url = "http://files.minecraftforge.net/maven" }
+        mavenCentral()
+    }
+    dependencies {
+        classpath "net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT"
+    }
+}
+
+plugins {
+    id "com.github.johnrengelman.shadow" version "1.2.4"
+    id 'com.matthewprenger.cursegradle' version '1.0.10'
+}
+
+apply plugin: 'net.minecraftforge.gradle.forge'
+
+version = project.mc_version + "-" + project.mod_version
+
+archivesBaseName = project.mod_name
+
+dependencies {
+    compile project(':core')
+}
+
+shadowJar {
+    classifier ''
+
+    dependencies {
+        include(project(":core"))
+    }
+
+    exclude 'dummyThing'
+}
+
+minecraft {
+    version = project.mc_version + "-" + project.forge_version + "-" + project.mc_version
+    runDir = "run"
+
+    mappings = project.mcp_mappings
+}
+
+processResources {
+    // this will ensure that this task is redone when the versions change.
+    inputs.property "version", project.mod_version
+    inputs.property "mcversion", project.minecraft.version
+
+    // replace stuff in mcmod.info, nothing else
+    from(project(":core").sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+
+        // replace version and mcversion
+        expand 'version': project.mod_version, 'mcversion': project.minecraft.version
+    }
+
+    // copy everything else except the mcmod.info
+    from(project(":core").sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+
+}
+
+sourceJar {
+    classifier 'sources'
+    // copy all the minecraftforge specific classes
+    from sourceSets.main.allSource
+
+    // copy everything else except the mcmod.info
+    from(project(":core").sourceSets.main.allSource) {
+        exclude 'mcmod.info'
+    }
+}
+
+reobf {
+    shadowJar { mappingType = 'SEARGE' }
+}
+
+tasks.shadowJar.finalizedBy reobfShadowJar
+
+curseforge {
+    if (project.hasProperty('CURSEFORGE_API_TOKEN') && project.hasProperty('release')) {
+        apiKey = CURSEFORGE_API_TOKEN
+    }
+    project {
+        id = project.curse_id
+        releaseType = project.curse_release_type
+        mainArtifact(shadowJar) {
+            displayName = "$rootProject.name-$version"
+        }
+    }
+}

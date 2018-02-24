@@ -11,9 +11,9 @@ Icon?
 ehthumbs.db
 Thumbs.db
 #gradle stuff
-/.gradle
-/build/
-/run*/
+.gradle/
+build/
+run*/
 /ui/
 gradle-app.setting
 #IDEA files from Gradle
@@ -27,7 +27,7 @@ gradle-app.setting
 version.properties
 #eclipse stuffs
 /.classpath
-/classes
+classes
 /.project
 /.settings/
 /eclipse/
@@ -38,4 +38,6 @@ version.properties
 /logs/
 options.txt
 /saves/
-/out
+out/
+.flooignore
+.floo

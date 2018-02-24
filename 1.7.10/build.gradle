@@ -1,0 +1,77 @@
+buildscript {
+    repositories {
+        jcenter()
+        maven { url = "http://files.minecraftforge.net/maven" }
+        mavenCentral()
+    }
+    dependencies {
+        classpath "net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT"
+    }
+}
+
+plugins {
+    id 'com.matthewprenger.cursegradle' version '1.0.10'
+}
+
+apply plugin: 'forge'
+
+version = project.mc_version + "-" + project.mod_version
+
+archivesBaseName = project.mod_name
+
+configurations {
+    shade
+    compile.extendsFrom shade
+}
+
+dependencies {
+    shade project(":core")
+}
+
+minecraft {
+    version = project.mc_version + "-" + project.forge_version + "-" + project.mc_version
+    runDir = "run"
+
+    mappings = project.mcp_mappings
+}
+
+processResources {
+    // this will ensure that this task is redone when the versions change.
+    inputs.property "version", project.mod_version
+    inputs.property "mcversion", project.minecraft.version
+
+    // replace stuff in mcmod.info, nothing else
+    from(project(":core").sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+
+        // replace version and mcversion
+        expand 'version': project.mod_version, 'mcversion': project.minecraft.version
+    }
+
+    // copy everything else except the mcmod.info
+    from(project(":core").sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+
+}
+
+jar {
+    configurations.shade.each { dep ->
+        from(project.zipTree(dep)) {
+            exclude "META-INF", "META-INF/**"
+        }
+    }
+}
+
+curseforge {
+    if (project.hasProperty('CURSEFORGE_API_TOKEN') && project.hasProperty('release')) {
+        apiKey = CURSEFORGE_API_TOKEN
+    }
+    project {
+        id = project.curse_id
+        releaseType = project.curse_release_type
+        mainArtifact(jar) {
+            displayName = "$rootProject.name-$version"
+        }
+    }
+}
