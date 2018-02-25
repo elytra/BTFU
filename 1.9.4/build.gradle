@@ -85,6 +85,7 @@ curseforge {
     project {
         id = project.curse_id
         releaseType = project.curse_release_type
+        addGameVersion '1.10.2'
         relations {
             requiredLibrary 'shadowfacts-forgelin'
         }

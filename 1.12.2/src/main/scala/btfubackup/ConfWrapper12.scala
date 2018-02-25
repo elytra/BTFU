@@ -18,7 +18,7 @@ class ConfWrapper12(c: Configuration) extends ConfWrapper {
     checkAndSave()
   }
 
-  override def getBoolean(option: String, section: String, defval: Boolean, desc: String): Boolean = c.getBoolean(option, section, defval, desc)
+  override def getBoolean(section: String, option: String, defval: Boolean, desc: String): Boolean = c.getBoolean(option, section, defval, desc)
   override def getString(section: String, option: String, defval: String): String = c.get(section, option, defval).getString
   override def getInt(section: String, option: String, defval: Int, descr: String): Int = c.get(section, option, defval, descr).getInt(defval)
   override def getStringList(option: String, section: String, defval: Array[String], descr: String): Array[String] = c.getStringList(option, section, defval, descr)

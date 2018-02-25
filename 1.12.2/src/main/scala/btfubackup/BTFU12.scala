@@ -11,7 +11,6 @@ import net.minecraftforge.fml.common.{FMLCommonHandler, Mod}
 import org.apache.logging.log4j.Logger
 
 object LogWrapper12 extends LogWrapper {
-  override def debug(s: String): Unit = BTFU12.logger.debug(s)
   override def err(s: String): Unit = BTFU12.logger.error(s)
   override def warn(s: String): Unit = BTFU12.logger.warn(s)
   override def warn(s: String, e: Throwable): Unit = BTFU12.logger.warn(s, e)

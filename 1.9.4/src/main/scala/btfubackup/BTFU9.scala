@@ -15,7 +15,6 @@ import org.apache.logging.log4j.Logger
 import net.minecraftforge.fml.common.SidedProxy
 
 object LogWrapper9 extends LogWrapper {
-  override def debug(s: String): Unit = BTFU9.logger.debug(s)
   override def err(s: String): Unit = BTFU9.logger.error(s)
   override def warn(s: String): Unit = BTFU9.logger.warn(s)
   override def warn(s: String, e: Throwable): Unit = BTFU9.logger.warn(s, e)

@@ -58,6 +58,7 @@ processResources {
 jar {
     configurations.shade.each { dep ->
         from(project.zipTree(dep)) {
+            exclude "scala", "scala/**"
             exclude "META-INF", "META-INF/**"
         }
     }

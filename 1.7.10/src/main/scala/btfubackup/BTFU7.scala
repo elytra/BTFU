@@ -15,7 +15,6 @@ import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent
 import net.minecraft.command.ServerCommand
 
 object LogWrapper7 extends LogWrapper {
-  override def debug(s: String): Unit = BTFU7.logger.debug(s)
   override def err(s: String): Unit = BTFU7.logger.error(s)
   override def warn(s: String): Unit = BTFU7.logger.warn(s)
   override def warn(s: String, e: Throwable): Unit = BTFU7.logger.warn(s, e)

@@ -4,7 +4,9 @@ import java.io.File
 import java.nio.file.{InvalidPathException, Path}
 
 trait LogWrapper {
-  def debug(s: String)
+  def debug(s: String): Unit = {
+    if (BTFU.cfg.debug) warn(s"debug: $s")
+  }
   def err(s: String)
   def warn(s: String)
   def warn(s: String, e: Throwable)
@@ -47,6 +49,7 @@ abstract class BTFU(log: LogWrapper) {
     startupPathChecks(BTFU.cfg.backupDir).foreach { error =>
       (if (BTFU.cfg.disablePrompts) None else getDediShlooper) match {
         case Some(shlooper) =>
+          Thread.sleep(1500)
           btfubanner()
           var pathCheck: Option[String] = Some(error)
           var enteredPath: Path = null
@@ -54,8 +57,12 @@ abstract class BTFU(log: LogWrapper) {
             log.err(pathCheck.get)
             log.err("Please enter a new path and press enter (or exit out and edit btfu.cfg)")
 
+            var enteredString = shlooper().getOrElse(return false)
+            if (enteredString.equals("stop")) return false
+            if (enteredString.startsWith("~/")) enteredString = System.getProperty("user.home") + enteredString.substring(1)
             pathCheck = try {
-              startupPathChecks(FileActions.canonicalize(new File(shlooper().getOrElse(return false)).toPath))
+              enteredPath = FileActions.canonicalize(new File(enteredString).toPath)
+              startupPathChecks(enteredPath)
             } catch {
               case t: InvalidPathException => Some(s"Invalid path: ${t.getMessage}")
               case t: Throwable => Some(s"${t.getClass.getCanonicalName}: ${t.getMessage}")

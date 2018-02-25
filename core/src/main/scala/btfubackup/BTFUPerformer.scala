@@ -100,15 +100,13 @@ class BackupProcess {
         deleteTmp()
 
         var backups = datestampedBackups
-        if (backups.size >= 3) {
+        if (backups.size >= 3 && cfg.maxAgeSec > 0) {
           val newestTime = backups.head._2
-          if (cfg.maxAgeSec > 0) {
-            datestampedBackups.dropWhile { case (_, time) => newestTime - time <= 1000 * cfg.maxAgeSec }.drop(1)
-              .foreach { case (name, _) =>
-                log.debug(s"Trimming old backup $name")
-                deleteBackup(name)
-              }
-          }
+          backups.dropWhile { case (_, time) => newestTime - time < 1000 * cfg.maxAgeSec }.drop(1)
+            .foreach { case (name, _) =>
+              log.debug(s"Trimming old backup $name")
+              deleteBackup(name)
+            }
         }
 
         while ({backups = datestampedBackups; backups.length + 1 > cfg.maxBackups}) {

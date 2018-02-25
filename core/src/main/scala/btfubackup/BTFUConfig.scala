@@ -15,7 +15,7 @@ trait ConfWrapper {
 }
 
 case class BTFUConfig(maxBackups: Int, disablePrompts: Boolean, cmds: BTFUNativeCommands,
-                               systemless: Boolean, excludes: Array[String], maxAgeSec: Int, c: ConfWrapper) {
+                               systemless: Boolean, excludes: Array[String], maxAgeSec: Long, debug: Boolean, c: ConfWrapper) {
   val mcDir = FileActions.canonicalize(new File(".").toPath)
 
   def backupDir: Path = c.getBackupDir()
@@ -43,7 +43,8 @@ object BTFUConfig {
       c.getStringList("excluded paths", "BTFU", Array(),
         "For normal operation, see rsync manual for --exclude.  For systemless mode, see java.nio.file.PathMatcher.  " +
           "Patterns are for relative paths from the server root."),
-      60*60*24*c.getInt("BTFU", "Maximum backup age", -1, "Backups older than this many days will be deleted prior to logarithmic pruning, -1 to keep a complete history"),
+      60L*60*24*c.getInt("BTFU", "Maximum backup age", -1, "Backups older than this many days will be deleted prior to logarithmic pruning, -1 to keep a complete history"),
+      c.getBoolean("BTFU", "debug", false, "print additional information during backup tasks"),
       c
     )
     c.checkAndSave()
