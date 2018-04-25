@@ -2,6 +2,7 @@ package btfubackup
 
 import java.io.File
 import java.nio.file.Path
+import java.text.SimpleDateFormat
 
 
 trait ConfWrapper {
@@ -15,8 +16,9 @@ trait ConfWrapper {
 }
 
 case class BTFUConfig(maxBackups: Int, disablePrompts: Boolean, cmds: BTFUNativeCommands,
-                               systemless: Boolean, excludes: Array[String], maxAgeSec: Long, debug: Boolean, c: ConfWrapper) {
-  val mcDir = FileActions.canonicalize(new File(".").toPath)
+                               systemless: Boolean, excludes: Array[String], maxAgeSec: Long, debug: Boolean,
+                               dateFormat: SimpleDateFormat, notDateFormat: SimpleDateFormat, c: ConfWrapper) {
+  val mcDir: Path = FileActions.canonicalize(new File(".").toPath)
 
   def backupDir: Path = c.getBackupDir()
 }
@@ -35,6 +37,13 @@ object BTFUConfig {
       c.getString("system", CP, CP),
       c.getString("system", RM, RM)
     )
+    val dateFormats = {
+      val _dateFormats = Seq(".", ":").map{colon => new SimpleDateFormat(s"yyyy-MM-dd_HH${colon}mm")}
+      if (c.getBoolean("BTFU", "windows-friendly datestamps", System.getProperty("os.name").startsWith("Windows"), "Use . instead of : in backup datestamps.  Turning this off on windows will cause a crash.  Turn it on if the backups need to be portable to windows."))
+        _dateFormats
+      else
+        _dateFormats.reverse
+    }
     val conf = BTFUConfig(
       c.getInt("BTFU", "number of backups to keep", 128),
       c.getBoolean("BTFU", "disable interactive prompts", false, "halt server instead of prompting at console on dedicated servers"),
@@ -45,6 +54,7 @@ object BTFUConfig {
           "Patterns are for relative paths from the server root."),
       60L*60*24*c.getInt("BTFU", "Maximum backup age", -1, "Backups older than this many days will be deleted prior to logarithmic pruning, -1 to keep a complete history"),
       c.getBoolean("BTFU", "debug", false, "print additional information during backup tasks"),
+      dateFormats(0), dateFormats(1),
       c
     )
     c.checkAndSave()

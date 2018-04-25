@@ -2,6 +2,7 @@ package btfubackup
 
 import java.io.File
 import java.nio.file.{InvalidPathException, Path}
+import java.util.Date
 
 trait LogWrapper {
   def debug(s: String): Unit = {
@@ -46,6 +47,19 @@ abstract class BTFU(log: LogWrapper) {
   }
 
   def handleStartupPathChecks(): Boolean = {
+    if (!startupPathChecks()) return false
+
+    // rename backups that conform to notDateFormat
+    FileActions.backupFilesFor(BTFU.cfg.notDateFormat).foreach{case (dir, date) =>
+      BTFU.cfg.backupDir.resolve(dir).toFile.renameTo(
+        BTFU.cfg.backupDir.resolve(BTFU.cfg.dateFormat.format(new Date(date))).toFile
+      )
+    }
+
+    true
+  }
+
+  def startupPathChecks(): Boolean = {
     startupPathChecks(BTFU.cfg.backupDir).foreach { error =>
       (if (BTFU.cfg.disablePrompts) None else getDediShlooper) match {
         case Some(shlooper) =>

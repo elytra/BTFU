@@ -2,11 +2,12 @@ package btfubackup
 
 import java.io.File
 import java.nio.file._
+import java.text.DateFormat
 
 import BTFU.cfg
 
 import scala.sys.process.Process
-import scala.util.Try
+import scala.util.{Success, Try}
 
 trait FileActions {
   def delete(f: File): Boolean
@@ -18,6 +19,10 @@ object FileActions {
   def subdirectoryOf(sub: Path, parent: Path): Boolean = subdirectoryOf(sub.toFile, parent)
   def subdirectoryOf(sub: File, parent: Path): Boolean = sub.getCanonicalFile.toPath.startsWith(canonicalize(parent))
   def canonicalize(p: Path) = p.toFile.getCanonicalFile.toPath
+  def enumerateBackupFiles() = cfg.backupDir.toFile.list.toList
+  def backupFilesFor(format: DateFormat) = enumerateBackupFiles().
+    map { s => (s, Try{ format.parse(s).getTime }) }.
+    collect { case (s, Success(d)) => (s, d) }
 }
 
 object ExternalCommandFileActions extends FileActions {

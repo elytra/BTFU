@@ -54,9 +54,6 @@ object BTFUPerformer {
   var nextRun: Option[Long] = None
   var backupProcess: Option[BackupProcess] = None
 
-  val dateFormat = new SimpleDateFormat(s"yyyy-MM-dd_HH${
-    if (System.getProperty("os.name").startsWith("Windows")) "." else ":" // windows can't have colons in filenames
-  }mm")
 
   def scheduleNextRun(): Unit = { nextRun = Some(System.currentTimeMillis + 1000 * 60 * 5) }
 
@@ -78,13 +75,11 @@ object BTFUPerformer {
 }
 
 class BackupProcess {
-  val fileActions = if (cfg.systemless) JvmNativeFileActions else ExternalCommandFileActions
-  val modelDir = cfg.backupDir.resolve("model")
-  val tmpDir = cfg.backupDir.resolve("tmp")
+  private val fileActions = if (cfg.systemless) JvmNativeFileActions else ExternalCommandFileActions
+  private val modelDir = cfg.backupDir.resolve("model")
+  private val tmpDir = cfg.backupDir.resolve("tmp")
 
-  private def datestampedBackups: List[(String, Long)] = cfg.backupDir.toFile.list.toList.
-      map { s => (s, Try{ BTFUPerformer.dateFormat.parse(s).getTime }) }.
-      collect { case (s, Success(d)) => (s, d) }.
+  private def datestampedBackups: List[(String, Long)] = FileActions.backupFilesFor(cfg.dateFormat).
       sortBy(_._2).reverse // sort by time since epoch descending
 
   private def deleteTmp() = deleteBackup("tmp") // clean incomplete backup copies
@@ -144,7 +139,7 @@ class BackupProcess {
       /**
         * Give the successful backup a date-name!
         */
-      val datestr = BTFUPerformer.dateFormat.format(new Date(backupDatestamp))
+      val datestr = BTFU.cfg.dateFormat.format(new Date(backupDatestamp))
       if (! tmpDir.toFile.renameTo(cfg.backupDir.resolve(datestr).toFile))
         log.err("rename failure??")
       else
