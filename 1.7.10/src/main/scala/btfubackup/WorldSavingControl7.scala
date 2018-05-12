@@ -2,7 +2,6 @@ package btfubackup
 
 import cpw.mods.fml.common.FMLCommonHandler
 import net.minecraft.server.MinecraftServer
-import net.minecraftforge.fml.common.FMLCommonHandler
 
 object WorldSavingControl7 extends WorldSavingControl {
   override def realSaveTasks(t: Int) = {

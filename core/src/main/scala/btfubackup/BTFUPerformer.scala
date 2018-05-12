@@ -48,7 +48,7 @@ abstract class WorldSavingControl {
     }
   }
 
-  var playersActive = false
+  var playersActiveCountDown: Int = cfg.numberInactiveBackups
   def getActivePlayerCount: Int
 }
 
@@ -94,9 +94,14 @@ class BackupProcess {
       /**
         * Phase 0: check playersActive
         */
-      if(!BTFUPerformer.worldSavingControl.playersActive) return
-      BTFUPerformer.worldSavingControl.playersActive = BTFUPerformer.worldSavingControl.getActivePlayerCount > 0
+      if(BTFUPerformer.worldSavingControl.playersActiveCountDown == -1) return
 
+      if(BTFUPerformer.worldSavingControl.playersActiveCountDown > -2) {
+        if(BTFUPerformer.worldSavingControl.getActivePlayerCount <= 0) {
+          BTFUPerformer.worldSavingControl.playersActiveCountDown -= 1
+          log.debug(s"keeping ${BTFUPerformer.worldSavingControl.playersActiveCountDown+1} more backups")
+        }
+      }
       /**
         * Phase 1: trim backups
         */
