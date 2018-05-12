@@ -28,4 +28,6 @@ object WorldSavingControl12 extends WorldSavingControl {
       case _ => throw new IllegalArgumentException(s"internal error in WorldSavingControl: invalid task: $t")
     }
   }
+
+  override def getActivePlayerCount: Int = FMLCommonHandler.instance().getMinecraftServerInstance.getCurrentPlayerCount
 }

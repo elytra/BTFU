@@ -1,9 +1,11 @@
 package btfubackup
 
 import btfubackup.BTFU.cfg
+import net.minecraft.server.MinecraftServer
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.Mod.EventHandler
 import net.minecraftforge.fml.common.event.{FMLPreInitializationEvent, FMLServerAboutToStartEvent, FMLServerStoppingEvent}
+import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent
@@ -40,6 +42,10 @@ object LogWrapper12 extends LogWrapper {
           WorldSavingControl12.mainThreadTick()
           BTFUPerformer.tick()
         }
+      }
+      @SubscribeEvent
+      def join(e: PlayerLoggedInEvent) {
+        BTFUPerformer.worldSavingControl.playersActive = true
       }
     }
     MinecraftForge.EVENT_BUS.register(handler)
