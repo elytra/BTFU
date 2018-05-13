@@ -45,7 +45,7 @@ object LogWrapper12 extends LogWrapper {
       }
       @SubscribeEvent
       def join(e: PlayerLoggedInEvent) {
-        BTFUPerformer.worldSavingControl.playersActiveCountDown = cfg.numberInactiveBackups
+        BTFUPerformer.worldSavingControl.playersActive = true
       }
     }
     MinecraftForge.EVENT_BUS.register(handler)
