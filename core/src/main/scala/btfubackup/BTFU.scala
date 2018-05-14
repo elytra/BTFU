@@ -41,7 +41,7 @@ abstract class BTFU(log: LogWrapper) {
 
     if (FileActions.subdirectoryOf(BTFU.cfg.mcDir, path))
       return Some(s"Backups directory ${'"'}$path${'"'} encompasses your minecraft server!\n" +
-        s"(are you trying to run a backup without copying it, or back up to a directory your minecraft server is in?)")
+        s"(are you trying to back up to a directory your minecraft server is in?)")
 
     None
   }
@@ -60,6 +60,23 @@ abstract class BTFU(log: LogWrapper) {
   }
 
   def startupPathChecks(): Boolean = {
+    if (!BTFU.cfg.backupDir.equals(BTFU.cfg.mcDir) && FileActions.subdirectoryOf(BTFU.cfg.mcDir, BTFU.cfg.backupDir)) {
+      btfubanner()
+      log.err(s"Backups directory ${'"'}${BTFU.cfg.backupDir}${'"'} encompasses your minecraft server!\n" +
+        s"(are you trying to run a backup without copying it, or back up to a directory your minecraft server is in?")
+      return false
+    }
+
+    java.nio.file.Files.getAttribute(BTFU.cfg.mcDir.resolve("server.properties"), "unix:nlink") match {
+      case i: Integer => if (i > 1) {
+        btfubanner()
+        log.err(s"Your minecraft server directory is hardlinked!\n" +
+          s"(Are you trying to run a backup that you moved instead of copying?  Doing so would corrupt your backup history!)")
+        return false
+      }
+      case _ =>
+    }
+
     startupPathChecks(BTFU.cfg.backupDir).foreach { error =>
       (if (BTFU.cfg.disablePrompts) None else getDediShlooper) match {
         case Some(shlooper) =>
