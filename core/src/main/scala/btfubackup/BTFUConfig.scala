@@ -56,7 +56,7 @@ object BTFUConfig {
       60L*60*24*c.getInt("BTFU", "Maximum backup age", -1, "Backups older than this many days will be deleted prior to logarithmic pruning, -1 to keep a complete history"),
       c.getBoolean("BTFU", "debug", false, "print additional information during backup tasks"),
       dateFormats(0), dateFormats(1),
-      c.getBoolean("BTFU", "Inactive Server backup", true, "keep backups when no players are active"),
+      c.getBoolean("BTFU", "backup while empty", true, "keep taking backups even when nobody is playing on the server"),
       c
     )
     c.checkAndSave()

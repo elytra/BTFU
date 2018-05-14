@@ -48,7 +48,7 @@ abstract class WorldSavingControl {
     }
   }
 
-  var playersActive = false
+  var playersActive = true
   def getActivePlayerCount: Int
 }
 
