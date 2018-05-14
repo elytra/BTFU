@@ -47,6 +47,9 @@ abstract class WorldSavingControl {
       }
     }
   }
+
+  var playersActive = false
+  def getActivePlayerCount: Int
 }
 
 object BTFUPerformer {
@@ -88,6 +91,14 @@ class BackupProcess {
   val futureTask = Future{task()}
   private def task(): Unit = {
     try {
+      /**
+        * Phase 0: check playersActive
+        */
+      if(!cfg.inactiveServerBackups) {
+        if(!BTFUPerformer.worldSavingControl.playersActive) return
+        BTFUPerformer.worldSavingControl.playersActive = BTFUPerformer.worldSavingControl.getActivePlayerCount > 0
+      }
+
       /**
         * Phase 1: trim backups
         */

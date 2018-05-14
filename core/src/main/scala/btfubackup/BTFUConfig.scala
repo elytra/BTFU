@@ -17,7 +17,8 @@ trait ConfWrapper {
 
 case class BTFUConfig(maxBackups: Int, disablePrompts: Boolean, cmds: BTFUNativeCommands,
                                systemless: Boolean, excludes: Array[String], maxAgeSec: Long, debug: Boolean,
-                               dateFormat: SimpleDateFormat, notDateFormat: SimpleDateFormat, c: ConfWrapper) {
+                               dateFormat: SimpleDateFormat, notDateFormat: SimpleDateFormat,
+                               inactiveServerBackups: Boolean, c: ConfWrapper) {
   val mcDir: Path = FileActions.canonicalize(new File(".").toPath)
 
   def backupDir: Path = c.getBackupDir()
@@ -55,6 +56,7 @@ object BTFUConfig {
       60L*60*24*c.getInt("BTFU", "Maximum backup age", -1, "Backups older than this many days will be deleted prior to logarithmic pruning, -1 to keep a complete history"),
       c.getBoolean("BTFU", "debug", false, "print additional information during backup tasks"),
       dateFormats(0), dateFormats(1),
+      c.getBoolean("BTFU", "Inactive Server backup", true, "keep backups when no players are active"),
       c
     )
     c.checkAndSave()

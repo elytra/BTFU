@@ -1,12 +1,10 @@
 package btfubackup
 
-import java.io.File
-import java.nio.file.Path
-
 import btfubackup.BTFU.cfg
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.Mod.EventHandler
 import net.minecraftforge.fml.common.event.{FMLPreInitializationEvent, FMLServerAboutToStartEvent, FMLServerStoppingEvent}
+import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent
@@ -42,6 +40,10 @@ object LogWrapper8 extends LogWrapper {
           WorldSavingControl8.mainThreadTick()
           BTFUPerformer.tick()
         }
+      }
+      @SubscribeEvent
+      def join(e: PlayerLoggedInEvent) {
+        BTFUPerformer.worldSavingControl.playersActive = true
       }
     }
     MinecraftForge.EVENT_BUS.register(handler)
