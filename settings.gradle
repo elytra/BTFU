@@ -1,2 +1,2 @@
 rootProject.name = 'BTFU'
-include 'core', '1.12.2', '1.11.2' , '1.9.4', '1.8.9'
+include 'core', '1.12.2', '1.11.2' , '1.9.4', '1.8.9', 'standalone'
