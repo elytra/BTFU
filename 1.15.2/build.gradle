@@ -97,6 +97,7 @@ curseforge {
     }
     project {
         id = project.curse_id
+        addGameVersion '1.15.2'
         releaseType = project.curse_release_type
         mainArtifact(shadowJar) {
             displayName = "$rootProject.name-$version"
