@@ -4,11 +4,11 @@ import java.nio.file.Path
 
 import net.minecraftforge.common.config.Configuration
 
-object ConfWrapper12 {
-  def apply(f: File): ConfWrapper = new ConfWrapper12(new Configuration(f))
+object ConfWrapper15 {
+  def apply(f: File): ConfWrapper = new ConfWrapper15(new Configuration(f))
 }
 
-class ConfWrapper12(c: Configuration) extends ConfWrapper {
+class ConfWrapper15(c: Configuration) extends ConfWrapper {
   private val backupDirProp = c.get("BTFU", "backup directory", "")
 
   override def getBackupDir(): Path = FileActions.canonicalize(new File(backupDirProp.getString).toPath)

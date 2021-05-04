@@ -5,16 +5,16 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT"
+        classpath "net.minecraftforge.gradle:ForgeGradle:3.+"
     }
 }
 
 plugins {
     id "com.github.johnrengelman.shadow" version "1.2.4"
-    id 'com.matthewprenger.cursegradle' version '1.0.10'
+    id 'com.matthewprenger.cursegradle' version '1.2.0'
 }
 
-apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: "net.minecraftforge.gradle"
 
 version = project.mc_version + "-" + project.mod_version
 
@@ -22,6 +22,11 @@ archivesBaseName = project.mod_name
 
 dependencies {
     compile project(':crafts')
+    minecraft([
+        group: "net.minecraftforge",
+        name: "forge",
+        version: "${project.mc_version}-${project.forge_version}"
+    ])
 }
 
 shadowJar {
@@ -35,23 +40,31 @@ shadowJar {
 }
 
 minecraft {
-    version = project.mc_version + "-" + project.forge_version
-    runDir = "run"
+    mappings channel: "snapshot", version: project.mcp_mappings
 
-    mappings = project.mcp_mappings
+    runs {
+        client {
+            property 'forge.logging.console.level', 'debug'
+            workingDirectory project.file('run')
+        }
+        server {
+            property 'forge.logging.console.level', 'debug'
+            workingDirectory project.file('run')
+        }
+    }
 }
 
 processResources {
     // this will ensure that this task is redone when the versions change.
     inputs.property "version", project.mod_version
-    inputs.property "mcversion", project.minecraft.version
+    inputs.property "mcversion", project.mc_version
 
     // replace stuff in mcmod.info, nothing else
     from(project(":core").sourceSets.main.resources.srcDirs) {
         include 'mcmod.info'
 
         // replace version and mcversion
-        expand 'version': project.mod_version, 'mcversion': project.minecraft.version
+        expand 'version': project.mod_version, 'mcversion': project.mc_version
     }
 
     // copy everything else except the mcmod.info
@@ -61,22 +74,22 @@ processResources {
 
 }
 
-sourceJar {
-    classifier 'sources'
-    // copy all the minecraftforge specific classes
-    from sourceSets.main.allSource
+//sourceJar {
+//    classifier 'sources'
+//    // copy all the minecraftforge specific classes
+//    from sourceSets.main.allSource
+//
+//    // copy everything else except the mcmod.info
+//    from(project(":core").sourceSets.main.allSource) {
+//        exclude 'mcmod.info'
+//    }
+//}
 
-    // copy everything else except the mcmod.info
-    from(project(":core").sourceSets.main.allSource) {
-        exclude 'mcmod.info'
-    }
-}
+//reobf { //TODO do we need this?
+//    shadowJar { mappingType = 'SEARGE' }
+//}
 
-reobf {
-    shadowJar { mappingType = 'SEARGE' }
-}
-
-tasks.shadowJar.finalizedBy reobfShadowJar
+//tasks.shadowJar.finalizedBy reobfShadowJar //TODO do we need this?
 
 curseforge {
     if (project.hasProperty('CURSEFORGE_API_TOKEN') && project.hasProperty('release')) {

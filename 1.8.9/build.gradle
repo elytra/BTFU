@@ -21,7 +21,7 @@ version = project.mc_version + "-" + project.mod_version
 archivesBaseName = project.mod_name
 
 dependencies {
-    compile project(':core')
+    compile project(':crafts')
 }
 
 shadowJar {
